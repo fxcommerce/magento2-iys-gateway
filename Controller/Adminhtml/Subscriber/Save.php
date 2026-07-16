@@ -25,7 +25,9 @@ class Save extends Action
                 $subscriberId,
                 (bool)$this->getRequest()->getParam('email_consent', false),
                 (bool)$this->getRequest()->getParam('sms_consent', false),
-                (bool)$this->getRequest()->getParam('call_consent', false)
+                (bool)$this->getRequest()->getParam('call_consent', false),
+                false,
+                (string)$this->getRequest()->getParam('phone_number', '')
             );
             $this->messageManager->addSuccessMessage(__('Communication consents were saved.'));
         } catch (\Throwable $exception) {
