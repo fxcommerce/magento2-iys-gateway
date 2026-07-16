@@ -27,17 +27,21 @@ class QueuePublisher
         }
 
         $payload = $this->buildPayload($subscriber);
-        $stateHash = sha1($this->json->serialize([
-            $payload['storeCode'],
+        $eventHash = hash('sha256', $this->json->serialize([
+            $payload['storeId'],
+            $payload['sourceRecordId'],
             $payload['emailConsent'],
+            $payload['emailConsentAt'],
             $payload['smsConsent'],
+            $payload['smsConsentAt'],
             $payload['callConsent'],
+            $payload['callConsentAt'],
         ]));
         $eventId = sprintf(
-            'magento:%d:%d:%s',
+            'magento-v2:%d:%d:%s',
             (int)$subscriber->getStoreId(),
             (int)$subscriber->getId(),
-            $stateHash
+            $eventHash
         );
         $payload['eventId'] = $eventId;
 
@@ -55,7 +59,6 @@ class QueuePublisher
             $queue->save();
             return true;
         } catch (AlreadyExistsException) {
-            // The same store-specific consent state has already been queued.
             return false;
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to queue IYS consent event.', [
@@ -72,7 +75,11 @@ class QueuePublisher
         $store = $this->storeManager->getStore((int)$subscriber->getStoreId());
         $website = $store->getWebsite();
         $emailConsent = (int)$subscriber->getStatus() === Subscriber::STATUS_SUBSCRIBED;
-        $changedAt = (string)($subscriber->getChangeStatusAt() ?: gmdate('c'));
+        $fallback = (string)($subscriber->getChangeStatusAt() ?: gmdate('Y-m-d H:i:s'));
+        $emailConsentAt = $this->timestamp($subscriber->getData('email_consent_at'), $fallback);
+        $smsConsentAt = $this->timestamp($subscriber->getData('sms_consent_at'), $fallback);
+        $callConsentAt = $this->timestamp($subscriber->getData('call_consent_at'), $fallback);
+        $consentAt = max([$emailConsentAt, $smsConsentAt, $callConsentAt]);
 
         return [
             'source' => 'magento',
@@ -86,9 +93,24 @@ class QueuePublisher
             'customerId' => $subscriber->getCustomerId() ? (int)$subscriber->getCustomerId() : null,
             'email' => strtolower((string)$subscriber->getSubscriberEmail()),
             'emailConsent' => $emailConsent,
+            'emailConsentAt' => $emailConsentAt,
             'smsConsent' => (bool)$subscriber->getData('sms_consent'),
+            'smsConsentAt' => $smsConsentAt,
             'callConsent' => (bool)$subscriber->getData('call_consent'),
-            'consentAt' => $changedAt,
+            'callConsentAt' => $callConsentAt,
+            'consentAt' => $consentAt,
         ];
+    }
+
+    private function timestamp(mixed $value, string $fallback): string
+    {
+        $candidate = trim((string)($value ?: $fallback));
+        try {
+            return (new \DateTimeImmutable($candidate, new \DateTimeZone('UTC')))
+                ->setTimezone(new \DateTimeZone('UTC'))
+                ->format('Y-m-d\TH:i:s\Z');
+        } catch (\Throwable) {
+            return gmdate('Y-m-d\TH:i:s\Z');
+        }
     }
 }
