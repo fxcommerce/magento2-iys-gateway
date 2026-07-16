@@ -1,6 +1,23 @@
 <?php
 /** @var \FxCommerce\IysGateway\Block\Consent $block */
 ?>
+<div class="field telephone">
+    <label for="iys_phone_number" class="label">
+        <span><?= $block->escapeHtml(__('Phone Number for SMS and Calls')) ?></span>
+    </label>
+    <div class="control">
+        <input type="tel"
+               name="phone_number"
+               id="iys_phone_number"
+               value="<?= $block->escapeHtmlAttr($block->getPhoneNumber()) ?>"
+               class="input-text"
+               autocomplete="tel"
+               data-validate='{"validate-phoneStrict":true}'>
+        <div class="note">
+            <?= $block->escapeHtml(__('Required when SMS or call consent is enabled.')) ?>
+        </div>
+    </div>
+</div>
 <div class="field choice">
     <input type="checkbox"
            name="sms_consent"
