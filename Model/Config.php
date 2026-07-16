@@ -11,7 +11,9 @@ class Config
 {
     private const XML_PREFIX = 'fxcommerce_iys/';
     private const TOKEN_VERSION = 'iysg1';
-    private const DEFAULT_ENDPOINT_PATH = '/v1/ingestion/consents/batch';
+    private const INGESTION_ENDPOINT_PATH = '/v2/ingestion/consents/batch';
+    private const ACTION_PULL_ENDPOINT_PATH = '/v2/integration/consent-actions/pull';
+    private const ACTION_ACK_ENDPOINT_PATH = '/v2/integration/consent-actions/ack';
     private const DEFAULT_REQUEST_TIMEOUT = 15;
 
     private array $connectionCache = [];
@@ -95,8 +97,20 @@ class Config
 
     public function getEndpointPath(?int $storeId = null): string
     {
-        $path = (string)($this->connection($storeId)['endpointPath'] ?? self::DEFAULT_ENDPOINT_PATH);
-        return '/' . ltrim($path ?: self::DEFAULT_ENDPOINT_PATH, '/');
+        $this->connection($storeId);
+        return self::INGESTION_ENDPOINT_PATH;
+    }
+
+    public function getActionPullEndpointPath(?int $storeId = null): string
+    {
+        $this->connection($storeId);
+        return self::ACTION_PULL_ENDPOINT_PATH;
+    }
+
+    public function getActionAckEndpointPath(?int $storeId = null): string
+    {
+        $this->connection($storeId);
+        return self::ACTION_ACK_ENDPOINT_PATH;
     }
 
     public function getRequestTimeout(?int $storeId = null): int
@@ -114,7 +128,6 @@ class Config
     {
         return max(1, min(100, (int)$this->value('sync/max_attempts', $storeId) ?: 10));
     }
-
 
     private function normalizeToken(string $value): string
     {
