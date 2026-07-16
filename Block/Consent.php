@@ -30,6 +30,20 @@ class Consent extends Template
         return (bool)$this->getSubscriber()?->getData('call_consent');
     }
 
+    public function getPhoneNumber(): string
+    {
+        $subscriberPhone = trim((string)$this->getSubscriber()?->getData('phone_number'));
+        if ($subscriberPhone !== '') {
+            return $subscriberPhone;
+        }
+        try {
+            $address = $this->customerSession->getCustomer()->getDefaultBillingAddress();
+            return $address ? trim((string)$address->getTelephone()) : '';
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
     private function getSubscriber(): ?\Magento\Newsletter\Model\Subscriber
     {
         $customerId = (int)$this->customerSession->getCustomerId();
