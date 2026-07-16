@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="newsletter_subscriber" resource="default" engine="innodb" comment="Newsletter Subscriber">
+        <column xsi:type="smallint" name="sms_consent" unsigned="true" nullable="false" default="0"
+                comment="SMS Consent"/>
+        <column xsi:type="smallint" name="call_consent" unsigned="true" nullable="false" default="0"
+                comment="Call Consent"/>
+    </table>
+
+    <table name="fxcommerce_iys_sync_queue" resource="default" engine="innodb"
+           comment="FxCommerce IYS Gateway Synchronization Queue">
+        <column xsi:type="int" name="queue_id" unsigned="true" nullable="false" identity="true"
+                comment="Queue ID"/>
+        <column xsi:type="int" name="subscriber_id" unsigned="true" nullable="false"
+                comment="Newsletter Subscriber ID"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Magento Store ID"/>
+        <column xsi:type="varchar" name="event_id" nullable="false" length="190" comment="Idempotency Event ID"/>
+        <column xsi:type="text" name="payload" nullable="false" length="2M" comment="JSON Payload"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending"
+                comment="Queue Status"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0"
+                comment="Attempt Count"/>
+        <column xsi:type="timestamp" name="available_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Available At"/>
+        <column xsi:type="text" name="last_error" nullable="true" length="64k" comment="Last Error"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP"
+                on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="queue_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FXCOMMERCE_IYS_SYNC_QUEUE_EVENT_ID_UNQ">
+            <column name="event_id"/>
+        </constraint>
+        <index referenceId="FXCOMMERCE_IYS_SYNC_QUEUE_STATUS_AVAILABLE_IDX" indexType="btree">
+            <column name="status"/>
+            <column name="available_at"/>
+        </index>
+        <index referenceId="FXCOMMERCE_IYS_SYNC_QUEUE_SUBSCRIBER_IDX" indexType="btree">
+            <column name="subscriber_id"/>
+        </index>
+        <index referenceId="FXCOMMERCE_IYS_SYNC_QUEUE_STORE_STATUS_IDX" indexType="btree">
+            <column name="store_id"/>
+            <column name="status"/>
+            <column name="available_at"/>
+        </index>
+    </table>
+</schema>

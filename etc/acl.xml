@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::marketing">
+                    <resource id="Magento_Backend::marketing_communications">
+                        <resource id="Magento_Newsletter::subscriber">
+                            <resource id="FxCommerce_IysGateway::subscriber_manage"
+                                      title="Manage Email, SMS and Call Consents"
+                                      translate="title"
+                                      sortOrder="50"/>
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="FxCommerce_IysGateway::config"
+                                      title="IYS Gateway Configuration"
+                                      translate="title"
+                                      sortOrder="980"/>
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="FxCommerce_IysGateway::api"
+                          title="FxCommerce IYS Gateway API"
+                          translate="title"
+                          sortOrder="990"/>
+            </resource>
+        </resources>
+    </acl>
+</config>

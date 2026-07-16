@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="FxCommerce\IysGateway\Api\ConsentManagementInterface"
+                type="FxCommerce\IysGateway\Model\ConsentManagement"/>
+    <preference for="FxCommerce\IysGateway\Api\Data\ConsentInterface"
+                type="FxCommerce\IysGateway\Model\Data\Consent"/>
+
+    <type name="Magento\Newsletter\Model\Subscriber">
+        <plugin name="fxcommerce_iys_gateway_subscriber_save"
+                type="FxCommerce\IysGateway\Plugin\Newsletter\SubscriberSavePlugin"
+                sortOrder="100"/>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="fxcommerce_iys_sync" xsi:type="object">FxCommerce\IysGateway\Console\Command\SyncCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

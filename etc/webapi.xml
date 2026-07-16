@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/fxcommerce/iys/subscribers/:subscriberId" method="GET">
+        <service class="FxCommerce\IysGateway\Api\ConsentManagementInterface" method="get"/>
+        <resources>
+            <resource ref="FxCommerce_IysGateway::api"/>
+        </resources>
+    </route>
+    <route url="/V1/fxcommerce/iys/subscribers" method="GET">
+        <service class="FxCommerce\IysGateway\Api\ConsentManagementInterface" method="getList"/>
+        <resources>
+            <resource ref="FxCommerce_IysGateway::api"/>
+        </resources>
+    </route>
+    <route url="/V1/fxcommerce/iys/consents" method="POST">
+        <service class="FxCommerce\IysGateway\Api\ConsentManagementInterface" method="save"/>
+        <resources>
+            <resource ref="FxCommerce_IysGateway::api"/>
+        </resources>
+    </route>
+    <route url="/V1/fxcommerce/iys/consents/batch" method="POST">
+        <service class="FxCommerce\IysGateway\Api\ConsentManagementInterface" method="saveBatch"/>
+        <resources>
+            <resource ref="FxCommerce_IysGateway::api"/>
+        </resources>
+    </route>
+</routes>

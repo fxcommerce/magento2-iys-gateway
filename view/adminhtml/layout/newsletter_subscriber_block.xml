@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="adminhtml.newslettrer.subscriber.grid.columnSet">
+            <block class="Magento\Backend\Block\Widget\Grid\Column"
+                   name="fxcommerce.iys.subscriber.grid.sms_consent" as="sms_consent">
+                <arguments>
+                    <argument name="header" xsi:type="string" translate="true">SMS Consent</argument>
+                    <argument name="index" xsi:type="string">sms_consent</argument>
+                    <argument name="renderer" xsi:type="object">FxCommerce\IysGateway\Block\Adminhtml\Subscriber\Grid\Renderer\Boolean</argument>
+                </arguments>
+            </block>
+            <block class="Magento\Backend\Block\Widget\Grid\Column"
+                   name="fxcommerce.iys.subscriber.grid.call_consent" as="call_consent">
+                <arguments>
+                    <argument name="header" xsi:type="string" translate="true">Call Consent</argument>
+                    <argument name="index" xsi:type="string">call_consent</argument>
+                    <argument name="renderer" xsi:type="object">FxCommerce\IysGateway\Block\Adminhtml\Subscriber\Grid\Renderer\Boolean</argument>
+                </arguments>
+            </block>
+            <block class="Magento\Backend\Block\Widget\Grid\Column"
+                   name="fxcommerce.iys.subscriber.grid.actions" as="fxcommerce_iys_actions">
+                <arguments>
+                    <argument name="header" xsi:type="string" translate="true">IYS Actions</argument>
+                    <argument name="index" xsi:type="string">subscriber_id</argument>
+                    <argument name="filter" xsi:type="boolean">false</argument>
+                    <argument name="sortable" xsi:type="boolean">false</argument>
+                    <argument name="renderer" xsi:type="object">FxCommerce\IysGateway\Block\Adminhtml\Subscriber\Grid\Renderer\Action</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

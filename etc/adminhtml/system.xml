@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="fxcommerce" translate="label" sortOrder="980">
+            <label>FxCommerce</label>
+        </tab>
+        <section id="fxcommerce_iys" translate="label" type="text" sortOrder="980"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>IYS Gateway</label>
+            <tab>fxcommerce</tab>
+            <resource>FxCommerce_IysGateway::config</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Store View Connection</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable IYS Gateway Synchronization</label>
+                    <comment>Synchronization starts automatically after a valid access key is saved.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="access_token" translate="label comment" type="obscure" sortOrder="20"
+                       showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>Gateway Access Key</label>
+                    <comment>Select a Store View scope and paste the access key generated for that exact Magento store code.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+            </group>
+
+            <group id="sync" translate="label" type="text" sortOrder="20"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Synchronization</label>
+                <field id="cron_enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Queue Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_expr" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cron Expression</label>
+                    <comment>Default: every 5 minutes.</comment>
+                </field>
+                <field id="batch_size" translate="label" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Size</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                </field>
+                <field id="max_attempts" translate="label" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Retry Attempts</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

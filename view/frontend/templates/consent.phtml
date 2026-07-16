@@ -1,0 +1,25 @@
+<?php
+/** @var \FxCommerce\IysGateway\Block\Consent $block */
+?>
+<div class="field choice">
+    <input type="checkbox"
+           name="sms_consent"
+           id="sms_consent"
+           value="1"
+           class="checkbox"
+           <?= $block->isSmsConsent() ? 'checked="checked"' : '' ?>>
+    <label for="sms_consent" class="label">
+        <span><?= $block->escapeHtml(__('I consent to receive commercial SMS messages.')) ?></span>
+    </label>
+</div>
+<div class="field choice">
+    <input type="checkbox"
+           name="call_consent"
+           id="call_consent"
+           value="1"
+           class="checkbox"
+           <?= $block->isCallConsent() ? 'checked="checked"' : '' ?>>
+    <label for="call_consent" class="label">
+        <span><?= $block->escapeHtml(__('I consent to receive commercial phone calls.')) ?></span>
+    </label>
+</div>

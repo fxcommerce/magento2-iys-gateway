@@ -1,0 +1,43 @@
+<?php
+/** @var \FxCommerce\IysGateway\Block\Adminhtml\Subscriber\Edit $block */
+$subscriber = $block->getSubscriber();
+?>
+<form action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" method="post">
+    <?= $block->getBlockHtml('formkey') ?>
+    <input type="hidden" name="subscriber_id" value="<?= (int)$subscriber->getId() ?>">
+    <div class="admin__fieldset-wrapper-content">
+        <fieldset class="admin__fieldset">
+            <div class="admin__field">
+                <label class="admin__field-label"><span><?= $block->escapeHtml(__('Subscriber')) ?></span></label>
+                <div class="admin__field-control">
+                    <strong><?= $block->escapeHtml((string)$subscriber->getSubscriberEmail()) ?></strong>
+                </div>
+            </div>
+            <div class="admin__field admin__field-option">
+                <input type="checkbox" class="admin__control-checkbox" name="email_consent" id="email_consent" value="1"
+                    <?= (int)$subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED ? 'checked="checked"' : '' ?>>
+                <label class="admin__field-label" for="email_consent"><span><?= $block->escapeHtml(__('Email Consent')) ?></span></label>
+            </div>
+            <div class="admin__field admin__field-option">
+                <input type="checkbox" class="admin__control-checkbox" name="sms_consent" id="sms_consent" value="1"
+                    <?= (bool)$subscriber->getData('sms_consent') ? 'checked="checked"' : '' ?>>
+                <label class="admin__field-label" for="sms_consent"><span><?= $block->escapeHtml(__('SMS Consent')) ?></span></label>
+            </div>
+            <div class="admin__field admin__field-option">
+                <input type="checkbox" class="admin__control-checkbox" name="call_consent" id="call_consent" value="1"
+                    <?= (bool)$subscriber->getData('call_consent') ? 'checked="checked"' : '' ?>>
+                <label class="admin__field-label" for="call_consent"><span><?= $block->escapeHtml(__('Call Consent')) ?></span></label>
+            </div>
+        </fieldset>
+    </div>
+    <div class="page-actions">
+        <div class="page-actions-buttons">
+            <a class="action-secondary" href="<?= $block->escapeUrl($block->getBackUrl()) ?>">
+                <span><?= $block->escapeHtml(__('Back')) ?></span>
+            </a>
+            <button type="submit" class="action-primary">
+                <span><?= $block->escapeHtml(__('Save Consents')) ?></span>
+            </button>
+        </div>
+    </div>
+</form>
