@@ -13,6 +13,21 @@ $subscriber = $block->getSubscriber();
                     <strong><?= $block->escapeHtml((string)$subscriber->getSubscriberEmail()) ?></strong>
                 </div>
             </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="phone_number">
+                    <span><?= $block->escapeHtml(__('Phone Number for SMS and Calls')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input type="tel"
+                           class="admin__control-text"
+                           name="phone_number"
+                           id="phone_number"
+                           value="<?= $block->escapeHtmlAttr((string)$subscriber->getData('phone_number')) ?>">
+                    <div class="admin__field-note">
+                        <span><?= $block->escapeHtml(__('Required when SMS or call consent is enabled.')) ?></span>
+                    </div>
+                </div>
+            </div>
             <div class="admin__field admin__field-option">
                 <input type="checkbox" class="admin__control-checkbox" name="email_consent" id="email_consent" value="1"
                     <?= (int)$subscriber->getStatus() === \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED ? 'checked="checked"' : '' ?>>
