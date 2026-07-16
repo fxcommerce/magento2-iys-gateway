@@ -6,6 +6,12 @@
                 comment="SMS Consent"/>
         <column xsi:type="smallint" name="call_consent" unsigned="true" nullable="false" default="0"
                 comment="Call Consent"/>
+        <column xsi:type="timestamp" name="email_consent_at" nullable="true"
+                comment="Email Consent Changed At"/>
+        <column xsi:type="timestamp" name="sms_consent_at" nullable="true"
+                comment="SMS Consent Changed At"/>
+        <column xsi:type="timestamp" name="call_consent_at" nullable="true"
+                comment="Call Consent Changed At"/>
     </table>
 
     <table name="fxcommerce_iys_sync_queue" resource="default" engine="innodb"
