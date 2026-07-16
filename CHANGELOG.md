@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.4
+
+- Added independent EMAIL, SMS and CALL consent timestamps.
+- Added signed Gateway action pull and acknowledgement endpoints.
+- Added bidirectional synchronization with newest-timestamp conflict resolution.
+- Prevented Gateway-originated updates from creating outbound echo events.
+- Added Store View scoped inbound cron and `--pull` CLI processing.
+- Added phone recipient storage and validation for SMS and call permissions.
+- Replaced state-only event IDs with timestamp-aware idempotent event IDs.
+- Added bounded Magento package dependency constraints.
+
 ## 1.2.3
 
 - Removed the hard runtime dependency on FxCommerce_Core while preserving the FxCommerce configuration tab.
