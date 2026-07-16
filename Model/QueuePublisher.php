@@ -26,26 +26,28 @@ class QueuePublisher
             return false;
         }
 
-        $payload = $this->buildPayload($subscriber);
-        $eventHash = hash('sha256', $this->json->serialize([
-            $payload['storeId'],
-            $payload['sourceRecordId'],
-            $payload['emailConsent'],
-            $payload['emailConsentAt'],
-            $payload['smsConsent'],
-            $payload['smsConsentAt'],
-            $payload['callConsent'],
-            $payload['callConsentAt'],
-        ]));
-        $eventId = sprintf(
-            'magento-v2:%d:%d:%s',
-            (int)$subscriber->getStoreId(),
-            (int)$subscriber->getId(),
-            $eventHash
-        );
-        $payload['eventId'] = $eventId;
-
         try {
+            $payload = $this->buildPayload($subscriber);
+            $eventHash = hash('sha256', $this->json->serialize([
+                $payload['storeId'],
+                $payload['sourceRecordId'],
+                $payload['email'],
+                $payload['phone'],
+                $payload['emailConsent'],
+                $payload['emailConsentAt'],
+                $payload['smsConsent'],
+                $payload['smsConsentAt'],
+                $payload['callConsent'],
+                $payload['callConsentAt'],
+            ]));
+            $eventId = sprintf(
+                'magento-v2:%d:%d:%s',
+                (int)$subscriber->getStoreId(),
+                (int)$subscriber->getId(),
+                $eventHash
+            );
+            $payload['eventId'] = $eventId;
+
             $queue = $this->queueFactory->create();
             $queue->setData([
                 'subscriber_id' => (int)$subscriber->getId(),
@@ -75,6 +77,13 @@ class QueuePublisher
         $store = $this->storeManager->getStore((int)$subscriber->getStoreId());
         $website = $store->getWebsite();
         $emailConsent = (int)$subscriber->getStatus() === Subscriber::STATUS_SUBSCRIBED;
+        $smsConsent = (bool)$subscriber->getData('sms_consent');
+        $callConsent = (bool)$subscriber->getData('call_consent');
+        $phone = $this->normalizePhone((string)$subscriber->getData('phone_number'));
+        if (($smsConsent || $callConsent) && $phone === '') {
+            throw new \RuntimeException('A phone number is required for approved SMS or call consent.');
+        }
+
         $fallback = (string)($subscriber->getChangeStatusAt() ?: gmdate('Y-m-d H:i:s'));
         $emailConsentAt = $this->timestamp($subscriber->getData('email_consent_at'), $fallback);
         $smsConsentAt = $this->timestamp($subscriber->getData('sms_consent_at'), $fallback);
@@ -92,11 +101,12 @@ class QueuePublisher
             'websiteName' => (string)$website->getName(),
             'customerId' => $subscriber->getCustomerId() ? (int)$subscriber->getCustomerId() : null,
             'email' => strtolower((string)$subscriber->getSubscriberEmail()),
+            'phone' => $phone !== '' ? $phone : null,
             'emailConsent' => $emailConsent,
             'emailConsentAt' => $emailConsentAt,
-            'smsConsent' => (bool)$subscriber->getData('sms_consent'),
+            'smsConsent' => $smsConsent,
             'smsConsentAt' => $smsConsentAt,
-            'callConsent' => (bool)$subscriber->getData('call_consent'),
+            'callConsent' => $callConsent,
             'callConsentAt' => $callConsentAt,
             'consentAt' => $consentAt,
         ];
@@ -112,5 +122,30 @@ class QueuePublisher
         } catch (\Throwable) {
             return gmdate('Y-m-d\TH:i:s\Z');
         }
+    }
+
+    private function normalizePhone(string $value): string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return '';
+        }
+        $digits = preg_replace('/\D+/', '', $trimmed) ?: '';
+        if (str_starts_with($trimmed, '00')) {
+            return '+' . substr($digits, 2);
+        }
+        if (str_starts_with($trimmed, '+')) {
+            return '+' . $digits;
+        }
+        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            return '+90' . substr($digits, 1);
+        }
+        if (strlen($digits) === 10) {
+            return '+90' . $digits;
+        }
+        if (strlen($digits) === 12 && str_starts_with($digits, '90')) {
+            return '+' . $digits;
+        }
+        return $digits;
     }
 }
