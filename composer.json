@@ -2,7 +2,7 @@
   "name": "fxcommerce/module-iys-gateway",
   "description": "Magento 2 email, SMS and call consent synchronization for IYS Gateway",
   "type": "magento2-module",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "license": [
     "proprietary"
   ],
