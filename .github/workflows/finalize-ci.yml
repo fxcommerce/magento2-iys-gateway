@@ -1,0 +1,57 @@
+name: Validate Magento Connector
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - name: Validate Composer metadata
+        run: composer validate --strict --no-check-publish
+
+      - name: PHP syntax
+        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: XML syntax
+        run: python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          files = list(Path('.').rglob('*.xml'))
+          for path in files:
+              ET.parse(path)
+          print(f'Validated {len(files)} XML files')
+          PY
+
+      - name: Build installable ZIP
+        run: |
+          mkdir -p build/app/code/FxCommerce/IysGateway
+          rsync -a --exclude='.git' --exclude='.github' --exclude='build' ./ build/app/code/FxCommerce/IysGateway/
+          cd build
+          zip -qr FxCommerce_IysGateway.zip app
+          unzip -t FxCommerce_IysGateway.zip
+
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: magento2-iys-gateway-source
+          path: .
+          include-hidden-files: true
+          retention-days: 1
+
+      - name: Upload installable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FxCommerce_IysGateway
+          path: build/FxCommerce_IysGateway.zip
+          retention-days: 7
