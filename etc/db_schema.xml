@@ -2,6 +2,8 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="newsletter_subscriber" resource="default" engine="innodb" comment="Newsletter Subscriber">
+        <column xsi:type="varchar" name="phone_number" nullable="true" length="32"
+                comment="SMS and Call Recipient Phone"/>
         <column xsi:type="smallint" name="sms_consent" unsigned="true" nullable="false" default="0"
                 comment="SMS Consent"/>
         <column xsi:type="smallint" name="call_consent" unsigned="true" nullable="false" default="0"
