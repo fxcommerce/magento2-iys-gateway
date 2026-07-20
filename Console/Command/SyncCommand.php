@@ -103,6 +103,14 @@ class SyncCommand extends Command
                             ? sprintf('<info>%s</info>', $message)
                             : sprintf('<error>%s</error>', $message)
                     );
+                    if (!empty($batch['error'])) {
+                        $output->writeln(sprintf(
+                            '<error>Store %s (#%d) error: %s</error>',
+                            (string)$batch['storeCode'],
+                            (int)$batch['storeId'],
+                            (string)$batch['error']
+                        ));
+                    }
                 }
             );
 
