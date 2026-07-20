@@ -13,6 +13,9 @@ use Psr\Log\LoggerInterface;
 
 class Exporter
 {
+    /** @var array<int, string> */
+    private array $lastErrors = [];
+
     public function __construct(
         private readonly CollectionFactory $collectionFactory,
         private readonly Config $config,
@@ -30,6 +33,10 @@ class Exporter
      */
     public function execute(?int $storeId = null): int
     {
+        if ($storeId !== null) {
+            unset($this->lastErrors[$storeId]);
+        }
+
         if ($storeId === null) {
             $total = 0;
             foreach ($this->storeManager->getStores() as $store) {
@@ -83,6 +90,7 @@ class Exporter
             }
             return count($items);
         } catch (\Throwable $exception) {
+            $this->lastErrors[$storeId] = $exception->getMessage();
             foreach ($items as $item) {
                 $this->markFailed($item, $exception, $storeId);
             }
@@ -101,7 +109,7 @@ class Exporter
      * and stops safely when a batch cannot make progress (for example, a remote
      * API error moved the records into retry backoff).
      *
-     * @param callable(array<string, int|string>):void|null $progress
+     * @param callable(array<string, int|string|null>):void|null $progress
      * @return array{exported:int,batches:int,remaining:int,ready:int,failed:int}
      */
     public function executeAll(?int $storeId = null, ?callable $progress = null): array
@@ -158,10 +166,11 @@ class Exporter
                         'ready' => $readyAfter,
                         'remaining' => $remaining,
                         'failed' => $failed,
+                        'error' => $this->lastErrors[$targetStoreId] ?? null,
                     ]);
                 }
 
-                if ($exported === 0 || $readyAfter >= $readyBefore) {
+                if ($readyAfter >= $readyBefore) {
                     break;
                 }
             }
@@ -172,6 +181,11 @@ class Exporter
         }
 
         return $summary;
+    }
+
+    public function getLastError(int $storeId): ?string
+    {
+        return $this->lastErrors[$storeId] ?? null;
     }
 
     public function countReady(int $storeId): int
