@@ -4,9 +4,9 @@
     <table name="newsletter_subscriber" resource="default" engine="innodb" comment="Newsletter Subscriber">
         <column xsi:type="varchar" name="phone_number" nullable="true" length="32"
                 comment="SMS and Call Recipient Phone"/>
-        <column xsi:type="smallint" name="sms_consent" unsigned="true" nullable="false" default="0"
+        <column xsi:type="smallint" name="sms_consent" unsigned="true" nullable="true"
                 comment="SMS Consent"/>
-        <column xsi:type="smallint" name="call_consent" unsigned="true" nullable="false" default="0"
+        <column xsi:type="smallint" name="call_consent" unsigned="true" nullable="true"
                 comment="Call Consent"/>
         <column xsi:type="timestamp" name="email_consent_at" nullable="true"
                 comment="Email Consent Changed At"/>

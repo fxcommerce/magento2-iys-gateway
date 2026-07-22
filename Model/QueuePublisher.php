@@ -16,6 +16,7 @@ class QueuePublisher
         private readonly Json $json,
         private readonly SynchronizationContext $context,
         private readonly StoreManagerInterface $storeManager,
+        private readonly PhoneResolver $phoneResolver,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -77,18 +78,25 @@ class QueuePublisher
         $store = $this->storeManager->getStore((int)$subscriber->getStoreId());
         $website = $store->getWebsite();
         $emailConsent = (int)$subscriber->getStatus() === Subscriber::STATUS_SUBSCRIBED;
-        $smsConsent = (bool)$subscriber->getData('sms_consent');
-        $callConsent = (bool)$subscriber->getData('call_consent');
-        $phone = $this->normalizePhone((string)$subscriber->getData('phone_number'));
+        $smsValue = $subscriber->getData('sms_consent');
+        $callValue = $subscriber->getData('call_consent');
+        $smsConsent = $smsValue === null ? null : (bool)$smsValue;
+        $callConsent = $callValue === null ? null : (bool)$callValue;
+        $phone = $this->phoneResolver->resolve($subscriber);
         if (($smsConsent || $callConsent) && $phone === '') {
             throw new \RuntimeException('A phone number is required for approved SMS or call consent.');
         }
 
         $fallback = (string)($subscriber->getChangeStatusAt() ?: gmdate('Y-m-d H:i:s'));
         $emailConsentAt = $this->timestamp($subscriber->getData('email_consent_at'), $fallback);
-        $smsConsentAt = $this->timestamp($subscriber->getData('sms_consent_at'), $fallback);
-        $callConsentAt = $this->timestamp($subscriber->getData('call_consent_at'), $fallback);
-        $consentAt = max([$emailConsentAt, $smsConsentAt, $callConsentAt]);
+        $smsConsentAt = $smsConsent === null
+            ? null
+            : $this->timestamp($subscriber->getData('sms_consent_at'), $fallback);
+        $callConsentAt = $callConsent === null
+            ? null
+            : $this->timestamp($subscriber->getData('call_consent_at'), $fallback);
+        $knownDates = array_filter([$emailConsentAt, $smsConsentAt, $callConsentAt]);
+        $consentAt = max($knownDates);
 
         return [
             'source' => 'magento',
@@ -124,28 +132,4 @@ class QueuePublisher
         }
     }
 
-    private function normalizePhone(string $value): string
-    {
-        $trimmed = trim($value);
-        if ($trimmed === '') {
-            return '';
-        }
-        $digits = preg_replace('/\D+/', '', $trimmed) ?: '';
-        if (str_starts_with($trimmed, '00')) {
-            return '+' . substr($digits, 2);
-        }
-        if (str_starts_with($trimmed, '+')) {
-            return '+' . $digits;
-        }
-        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
-            return '+90' . substr($digits, 1);
-        }
-        if (strlen($digits) === 10) {
-            return '+90' . $digits;
-        }
-        if (strlen($digits) === 12 && str_starts_with($digits, '90')) {
-            return '+' . $digits;
-        }
-        return $digits;
-    }
 }

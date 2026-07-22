@@ -22,7 +22,7 @@ $subscriber = $block->getSubscriber();
                            class="admin__control-text"
                            name="phone_number"
                            id="phone_number"
-                           value="<?= $block->escapeHtmlAttr((string)$subscriber->getData('phone_number')) ?>">
+                           value="<?= $block->escapeHtmlAttr($block->getPhoneNumber()) ?>">
                     <div class="admin__field-note">
                         <span><?= $block->escapeHtml(__('Required when SMS or call consent is enabled.')) ?></span>
                     </div>
@@ -35,12 +35,12 @@ $subscriber = $block->getSubscriber();
             </div>
             <div class="admin__field admin__field-option">
                 <input type="checkbox" class="admin__control-checkbox" name="sms_consent" id="sms_consent" value="1"
-                    <?= (bool)$subscriber->getData('sms_consent') ? 'checked="checked"' : '' ?>>
+                    <?= $block->isSmsConsent() ? 'checked="checked"' : '' ?>>
                 <label class="admin__field-label" for="sms_consent"><span><?= $block->escapeHtml(__('SMS Consent')) ?></span></label>
             </div>
             <div class="admin__field admin__field-option">
                 <input type="checkbox" class="admin__control-checkbox" name="call_consent" id="call_consent" value="1"
-                    <?= (bool)$subscriber->getData('call_consent') ? 'checked="checked"' : '' ?>>
+                    <?= $block->isCallConsent() ? 'checked="checked"' : '' ?>>
                 <label class="admin__field-label" for="call_consent"><span><?= $block->escapeHtml(__('Call Consent')) ?></span></label>
             </div>
         </fieldset>

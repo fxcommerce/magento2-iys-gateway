@@ -211,6 +211,25 @@ class Exporter
         return (int)$collection->getSize();
     }
 
+    public function retryOutstandingNow(int $storeId): int
+    {
+        $collection = $this->collectionFactory->create();
+        $collection->addFieldToFilter('store_id', $storeId);
+        $collection->addFieldToFilter('status', [
+            'in' => [Queue::STATUS_PENDING, Queue::STATUS_PROCESSING, Queue::STATUS_FAILED],
+        ]);
+        $count = 0;
+        foreach ($collection as $item) {
+            $item->setData('status', Queue::STATUS_PENDING)
+                ->setData('attempts', 0)
+                ->setData('available_at', gmdate('Y-m-d H:i:s'))
+                ->setData('last_error', null)
+                ->save();
+            ++$count;
+        }
+        return $count;
+    }
+
     private function createReadyCollection(int $storeId): Collection
     {
         $collection = $this->collectionFactory->create();

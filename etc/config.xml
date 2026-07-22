@@ -13,6 +13,10 @@
                 <batch_size>100</batch_size>
                 <max_attempts>10</max_attempts>
             </sync>
+            <phone>
+                <source>subscriber</source>
+                <attribute_code>phone_number</attribute_code>
+            </phone>
         </fxcommerce_iys>
     </default>
 </config>

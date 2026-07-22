@@ -3,7 +3,7 @@
 ?>
 <div class="field telephone">
     <label for="iys_phone_number" class="label">
-        <span><?= $block->escapeHtml(__('Phone Number for SMS and Calls')) ?></span>
+        <span><?= $block->escapeHtml(__('GSM Number')) ?></span>
     </label>
     <div class="control">
         <input type="tel"
@@ -14,7 +14,7 @@
                autocomplete="tel"
                data-validate='{"validate-phoneStrict":true}'>
         <div class="note">
-            <?= $block->escapeHtml(__('Required when SMS or call consent is enabled.')) ?>
+            <?= $block->escapeHtml(__('SMS and call permissions apply to this GSM number.')) ?>
         </div>
     </div>
 </div>

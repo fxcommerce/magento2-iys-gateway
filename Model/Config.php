@@ -11,9 +11,9 @@ class Config
 {
     private const XML_PREFIX = 'fxcommerce_iys/';
     private const TOKEN_VERSION = 'iysg1';
-    private const INGESTION_ENDPOINT_PATH = '/v2/ingestion/consents/batch';
-    private const ACTION_PULL_ENDPOINT_PATH = '/v2/integration/consent-actions/pull';
-    private const ACTION_ACK_ENDPOINT_PATH = '/v2/integration/consent-actions/ack';
+    private const INGESTION_ENDPOINT_PATH = '/api/v2/ingestion/consents/batch';
+    private const ACTION_PULL_ENDPOINT_PATH = '/api/v2/integration/consent-actions/pull';
+    private const ACTION_ACK_ENDPOINT_PATH = '/api/v2/integration/consent-actions/ack';
     private const DEFAULT_REQUEST_TIMEOUT = 15;
 
     private array $connectionCache = [];
@@ -127,6 +127,16 @@ class Config
     public function getMaxAttempts(?int $storeId = null): int
     {
         return max(1, min(100, (int)$this->value('sync/max_attempts', $storeId) ?: 10));
+    }
+
+    public function getPhoneSource(?int $storeId = null): string
+    {
+        return (string)($this->value('phone/source', $storeId) ?: 'subscriber');
+    }
+
+    public function getPhoneAttributeCode(?int $storeId = null): string
+    {
+        return trim((string)($this->value('phone/attribute_code', $storeId) ?: 'phone_number'));
     }
 
     private function normalizeToken(string $value): string

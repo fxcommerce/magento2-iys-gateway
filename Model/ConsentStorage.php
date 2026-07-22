@@ -16,7 +16,8 @@ class ConsentStorage
         private readonly SubscriberResource $subscriberResource,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly SynchronizationContext $context,
-        private readonly QueuePublisher $queuePublisher
+        private readonly QueuePublisher $queuePublisher,
+        private readonly PhoneStorage $phoneStorage
     ) {
     }
 
@@ -34,6 +35,20 @@ class ConsentStorage
     {
         $collection = $this->subscriberFactory->create()->getCollection();
         $collection->addFieldToFilter('subscriber_email', strtolower(trim($email)));
+        $collection->addFieldToFilter('store_id', $storeId);
+        $collection->setPageSize(1);
+        $subscriber = $collection->getFirstItem();
+        return $subscriber->getId() ? $subscriber : null;
+    }
+
+    public function getByPhone(string $phone, int $storeId): ?Subscriber
+    {
+        $normalized = $this->normalizePhone($phone);
+        if ($normalized === '') {
+            return null;
+        }
+        $collection = $this->subscriberFactory->create()->getCollection();
+        $collection->addFieldToFilter('phone_number', $normalized);
         $collection->addFieldToFilter('store_id', $storeId);
         $collection->setPageSize(1);
         $subscriber = $collection->getFirstItem();
@@ -75,6 +90,7 @@ class ConsentStorage
             }
         }
 
+        $this->phoneStorage->write($subscriber, $phone);
         $subscriber->setData('phone_number', $phone !== '' ? $phone : null);
         $subscriber->setData('sms_consent', $smsConsent ? 1 : 0);
         $subscriber->setData('call_consent', $callConsent ? 1 : 0);
@@ -111,7 +127,7 @@ class ConsentStorage
                 ? Subscriber::STATUS_SUBSCRIBED
                 : Subscriber::STATUS_UNSUBSCRIBED;
             $phone = $phoneNumber === null
-                ? $this->normalizePhone((string)$subscriber->getData('phone_number'))
+                ? $this->phoneStorage->read($subscriber)
                 : $this->normalizePhone($phoneNumber);
             if (($smsConsent || $callConsent) && $phone === '') {
                 throw new LocalizedException(__('A valid phone number is required for SMS or call consent.'));
@@ -129,6 +145,9 @@ class ConsentStorage
                 $subscriber->setData('call_consent_at', $now);
             }
 
+            if ($phoneNumber !== null) {
+                $this->phoneStorage->write($subscriber, $phone);
+            }
             $subscriber->setData('subscriber_status', $nextEmailStatus);
             $subscriber->setData('phone_number', $phone !== '' ? $phone : null);
             $subscriber->setData('sms_consent', $smsConsent ? 1 : 0);
@@ -145,6 +164,7 @@ class ConsentStorage
 
     public function applyInboundAction(
         string $email,
+        string $phone,
         int $storeId,
         string $channel,
         bool $approved,
@@ -152,14 +172,23 @@ class ConsentStorage
     ): Subscriber {
         return $this->context->runInbound(function () use (
             $email,
+            $phone,
             $storeId,
             $channel,
             $approved,
             $consentAt
         ): Subscriber {
-            $subscriber = $this->getByEmail($email, $storeId);
+            $subscriber = $email !== '' ? $this->getByEmail($email, $storeId) : null;
+            if (!$subscriber && $phone !== '') {
+                $subscriber = $this->getByPhone($phone, $storeId);
+            }
             $dbTimestamp = $this->databaseTimestamp($consentAt);
             if (!$subscriber) {
+                if ($email === '') {
+                    throw new LocalizedException(__(
+                        'No Magento subscriber matches this phone number; the consent remains in IYS Gateway.'
+                    ));
+                }
                 $subscriber = $this->subscriberFactory->create();
                 $subscriber->setData('subscriber_email', strtolower(trim($email)));
                 $subscriber->setData('store_id', $storeId);
@@ -181,6 +210,9 @@ class ConsentStorage
                     $subscriber->setData('change_status_at', $dbTimestamp);
                     break;
                 case 'SMS':
+                    if ($phone !== '') {
+                        $subscriber->setData('phone_number', $this->normalizePhone($phone));
+                    }
                     if ($approved && !$subscriber->getData('phone_number')) {
                         throw new LocalizedException(__('Subscriber has no phone number for approved SMS consent.'));
                     }
@@ -188,6 +220,9 @@ class ConsentStorage
                     $subscriber->setData('sms_consent_at', $dbTimestamp);
                     break;
                 case 'CALL':
+                    if ($phone !== '') {
+                        $subscriber->setData('phone_number', $this->normalizePhone($phone));
+                    }
                     if ($approved && !$subscriber->getData('phone_number')) {
                         throw new LocalizedException(__('Subscriber has no phone number for approved call consent.'));
                     }

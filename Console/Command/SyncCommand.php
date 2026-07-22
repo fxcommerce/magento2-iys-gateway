@@ -19,6 +19,7 @@ class SyncCommand extends Command
     private const OPTION_LIMIT = 'limit';
     private const OPTION_EXPORT = 'export';
     private const OPTION_PULL = 'pull';
+    private const OPTION_RETRY_NOW = 'retry-now';
 
     public function __construct(
         private readonly CollectionFactory $collectionFactory,
@@ -48,6 +49,12 @@ class SyncCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Pull and apply all ready IYS decisions, batch by batch'
+            )
+            ->addOption(
+                self::OPTION_RETRY_NOW,
+                null,
+                InputOption::VALUE_NONE,
+                'Reset outstanding records and make them immediately eligible for export (requires --store-id)'
             );
         parent::configure();
     }
@@ -58,6 +65,15 @@ class SyncCommand extends Command
         $storeIdOption = $input->getOption(self::OPTION_STORE_ID);
         $storeId = $storeIdOption !== null ? (int)$storeIdOption : null;
         $limit = max(0, (int)$input->getOption(self::OPTION_LIMIT));
+
+        if ($input->getOption(self::OPTION_RETRY_NOW)) {
+            if ($storeId === null || $storeId <= 0) {
+                $output->writeln('<error>--retry-now requires a valid --store-id.</error>');
+                return Command::INVALID;
+            }
+            $reset = $this->exporter->retryOutstandingNow($storeId);
+            $output->writeln(sprintf('<info>%d outstanding queue records are ready for immediate retry.</info>', $reset));
+        }
 
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter('subscriber_id', ['gt' => $fromId]);

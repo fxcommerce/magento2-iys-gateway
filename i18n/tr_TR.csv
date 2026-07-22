@@ -19,3 +19,7 @@
 "Gateway Access Key","Gateway Erişim Anahtarı"
 "Copy the one-time access key generated in IYS Gateway > Integrations > Magento.","IYS Gateway > Entegrasyonlar > Magento ekranında oluşturulan tek kullanımlık erişim anahtarını kopyalayın."
 "Synchronization starts automatically after a valid access key is saved.","Geçerli erişim anahtarı kaydedildiğinde senkronizasyon otomatik olarak başlar."
+"GSM Number","Cep telefonu"
+"SMS and call permissions apply to this GSM number.","SMS ve arama izinleri bu cep telefonu için geçerlidir."
+"Newsletter subscriber table field","Newsletter abone tablosundaki alan"
+"Customer attribute","Müşteri özelliği (customer attribute)"

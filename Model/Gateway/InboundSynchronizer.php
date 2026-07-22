@@ -37,6 +37,7 @@ class InboundSynchronizer
                 $normalized = $this->normalizeAction($action);
                 $this->consentStorage->applyInboundAction(
                     $normalized['email'],
+                    $normalized['phone'],
                     $storeId,
                     $normalized['channel'],
                     $normalized['status'] === 'APPROVED',
@@ -105,7 +106,7 @@ class InboundSynchronizer
         return $summary;
     }
 
-    /** @return array{actionId:string,email:string,channel:string,status:string,consentAt:string} */
+    /** @return array{actionId:string,email:string,phone:string,channel:string,status:string,consentAt:string} */
     private function normalizeAction(mixed $value): array
     {
         if (!is_array($value)) {
@@ -116,12 +117,16 @@ class InboundSynchronizer
             throw new \RuntimeException('IYS action ID is invalid.');
         }
         $email = strtolower(trim((string)($value['email'] ?? '')));
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \RuntimeException('IYS action email is invalid.');
-        }
         $channel = strtoupper(trim((string)($value['channel'] ?? '')));
         if (!in_array($channel, ['EMAIL', 'SMS', 'CALL'], true)) {
             throw new \RuntimeException('IYS action channel is invalid.');
+        }
+        $phone = trim((string)($value['phone'] ?? ''));
+        if ($channel === 'EMAIL' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('IYS action email is invalid.');
+        }
+        if ($channel !== 'EMAIL' && $email === '' && $phone === '') {
+            throw new \RuntimeException('IYS SMS/call action has neither an email nor a phone number.');
         }
         $status = strtoupper(trim((string)($value['status'] ?? '')));
         if (!in_array($status, ['APPROVED', 'REJECTED'], true)) {
@@ -133,6 +138,6 @@ class InboundSynchronizer
         } catch (\Throwable) {
             throw new \RuntimeException('IYS action timestamp is invalid.');
         }
-        return compact('actionId', 'email', 'channel', 'status', 'consentAt');
+        return compact('actionId', 'email', 'phone', 'channel', 'status', 'consentAt');
     }
 }

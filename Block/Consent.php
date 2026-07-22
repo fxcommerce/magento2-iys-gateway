@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FxCommerce\IysGateway\Block;
 
 use FxCommerce\IysGateway\Model\ConsentStorage;
+use FxCommerce\IysGateway\Model\PhoneStorage;
 use Magento\Customer\Model\Session;
 use Magento\Framework\View\Element\Template;
 use Magento\Store\Model\StoreManagerInterface;
@@ -15,6 +16,7 @@ class Consent extends Template
         private readonly Session $customerSession,
         private readonly StoreManagerInterface $storeManager,
         private readonly ConsentStorage $consentStorage,
+        private readonly PhoneStorage $phoneStorage,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -22,26 +24,24 @@ class Consent extends Template
 
     public function isSmsConsent(): bool
     {
-        return (bool)$this->getSubscriber()?->getData('sms_consent');
+        $subscriber = $this->getSubscriber();
+        return $subscriber !== null
+            && $this->phoneStorage->isCurrentRecipient($subscriber)
+            && (bool)$subscriber->getData('sms_consent');
     }
 
     public function isCallConsent(): bool
     {
-        return (bool)$this->getSubscriber()?->getData('call_consent');
+        $subscriber = $this->getSubscriber();
+        return $subscriber !== null
+            && $this->phoneStorage->isCurrentRecipient($subscriber)
+            && (bool)$subscriber->getData('call_consent');
     }
 
     public function getPhoneNumber(): string
     {
-        $subscriberPhone = trim((string)$this->getSubscriber()?->getData('phone_number'));
-        if ($subscriberPhone !== '') {
-            return $subscriberPhone;
-        }
-        try {
-            $address = $this->customerSession->getCustomer()->getDefaultBillingAddress();
-            return $address ? trim((string)$address->getTelephone()) : '';
-        } catch (\Throwable) {
-            return '';
-        }
+        $subscriber = $this->getSubscriber();
+        return $subscriber ? $this->phoneStorage->read($subscriber) : '';
     }
 
     private function getSubscriber(): ?\Magento\Newsletter\Model\Subscriber
