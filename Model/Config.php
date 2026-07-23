@@ -136,7 +136,7 @@ class Config
 
     public function isSmsEnabled(?int $storeId = null): bool
     {
-        return $this->scopeConfig->isSetFlag(
+        return $this->isEnabled($storeId) && $this->scopeConfig->isSetFlag(
             self::XML_PREFIX . 'phone/sms_enabled',
             ScopeInterface::SCOPE_STORE,
             $storeId
@@ -145,7 +145,7 @@ class Config
 
     public function isCallEnabled(?int $storeId = null): bool
     {
-        return $this->scopeConfig->isSetFlag(
+        return $this->isEnabled($storeId) && $this->scopeConfig->isSetFlag(
             self::XML_PREFIX . 'phone/call_enabled',
             ScopeInterface::SCOPE_STORE,
             $storeId
