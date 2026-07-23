@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.5
+
+- Added independent Store View scoped enable/disable controls for SMS and call consent.
+- Bound SMS and call channels to the main IYS Gateway enable state.
+- Hidden disabled channels from the customer Newsletter page and excluded them from outbound and inbound synchronization.
+- Hidden the editable GSM field when the phone source is a customer attribute.
+
 ## 1.2.4
 
 - Added independent EMAIL, SMS and CALL consent timestamps.
