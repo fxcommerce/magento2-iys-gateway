@@ -14,8 +14,8 @@
                 <max_attempts>10</max_attempts>
             </sync>
             <phone>
-                <sms_enabled>1</sms_enabled>
-                <call_enabled>1</call_enabled>
+                <sms_enabled>0</sms_enabled>
+                <call_enabled>0</call_enabled>
                 <source>subscriber</source>
                 <subscriber_field>phone_number</subscriber_field>
                 <customer_attribute></customer_attribute>
