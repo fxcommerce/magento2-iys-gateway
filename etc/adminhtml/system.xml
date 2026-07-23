@@ -36,12 +36,18 @@
                     <label>Enable SMS Consent</label>
                     <comment>Show and synchronize SMS consent for this store view.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="fxcommerce_iys/general/enabled">1</field>
+                    </depends>
                 </field>
                 <field id="call_enabled" translate="label comment" type="select" sortOrder="6"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Call Consent</label>
                     <comment>Show and synchronize call consent for this store view.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="fxcommerce_iys/general/enabled">1</field>
+                    </depends>
                 </field>
                 <field id="source" translate="label comment" type="select" sortOrder="10"
                        showInDefault="1" showInWebsite="1" showInStore="1">
