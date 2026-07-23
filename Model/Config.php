@@ -136,7 +136,52 @@ class Config
 
     public function getPhoneAttributeCode(?int $storeId = null): string
     {
-        return trim((string)($this->value('phone/attribute_code', $storeId) ?: 'phone_number'));
+        if ($this->getPhoneSource($storeId) === 'customer') {
+            return trim((string)($this->value('phone/customer_attribute', $storeId)
+                ?: $this->value('phone/attribute_code', $storeId)));
+        }
+
+        return trim((string)($this->value('phone/subscriber_field', $storeId)
+            ?: $this->value('phone/attribute_code', $storeId)
+            ?: 'phone_number'));
+    }
+
+    public function getPhoneLabel(?int $storeId = null): string
+    {
+        return $this->displayValue('phone_label', (string)__('GSM Number'), $storeId);
+    }
+
+    public function getPhoneNote(?int $storeId = null): string
+    {
+        return $this->displayValue(
+            'phone_note',
+            (string)__('SMS and call permissions apply to this GSM number.'),
+            $storeId
+        );
+    }
+
+    public function getSmsLabel(?int $storeId = null): string
+    {
+        return $this->displayValue(
+            'sms_label',
+            (string)__('I consent to receive commercial SMS messages.'),
+            $storeId
+        );
+    }
+
+    public function getCallLabel(?int $storeId = null): string
+    {
+        return $this->displayValue(
+            'call_label',
+            (string)__('I consent to receive commercial phone calls.'),
+            $storeId
+        );
+    }
+
+    private function displayValue(string $field, string $default, ?int $storeId = null): string
+    {
+        $value = trim((string)$this->value('phone/display/' . $field, $storeId));
+        return (string)__($value !== '' ? $value : $default);
     }
 
     private function normalizeToken(string $value): string

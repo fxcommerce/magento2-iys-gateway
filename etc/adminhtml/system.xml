@@ -37,11 +37,48 @@
                     <comment>Select where the customer's current GSM number is stored.</comment>
                     <source_model>FxCommerce\IysGateway\Model\Config\Source\PhoneSource</source_model>
                 </field>
-                <field id="attribute_code" translate="label comment" type="text" sortOrder="20"
+                <field id="subscriber_field" translate="label comment" type="text" sortOrder="20"
                        showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Phone Field / Attribute Code</label>
-                    <comment>Examples: phone_number, mobile_phone or gsm. Use phone_number with the newsletter source to use the field supplied by this module.</comment>
+                    <label>Newsletter Phone Field</label>
+                    <comment>Enter the newsletter_subscriber table field that stores the GSM number. The field supplied by this module is phone_number.</comment>
+                    <validate>required-entry validate-code</validate>
+                    <depends>
+                        <field id="source">subscriber</field>
+                    </depends>
                 </field>
+                <field id="customer_attribute" translate="label comment" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customer Phone Attribute</label>
+                    <comment>Select the customer attribute that stores the GSM number.</comment>
+                    <source_model>FxCommerce\IysGateway\Model\Config\Source\CustomerAttribute</source_model>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="source">customer</field>
+                    </depends>
+                </field>
+
+                <group id="display" translate="label" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Display</label>
+                    <field id="phone_label" translate="label comment" type="text" sortOrder="10"
+                           showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Phone Number Label</label>
+                        <comment>Displayed on the customer Newsletter page.</comment>
+                    </field>
+                    <field id="phone_note" translate="label comment" type="text" sortOrder="20"
+                           showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Phone Number Description</label>
+                        <comment>Displayed below the phone number field.</comment>
+                    </field>
+                    <field id="sms_label" translate="label comment" type="text" sortOrder="30"
+                           showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>SMS Consent Label</label>
+                    </field>
+                    <field id="call_label" translate="label comment" type="text" sortOrder="40"
+                           showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Call Consent Label</label>
+                    </field>
+                </group>
             </group>
 
             <group id="sync" translate="label" type="text" sortOrder="20"

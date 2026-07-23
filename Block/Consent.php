@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FxCommerce\IysGateway\Block;
 
 use FxCommerce\IysGateway\Model\ConsentStorage;
+use FxCommerce\IysGateway\Model\Config;
 use FxCommerce\IysGateway\Model\PhoneStorage;
 use Magento\Customer\Model\Session;
 use Magento\Framework\View\Element\Template;
@@ -17,6 +18,7 @@ class Consent extends Template
         private readonly StoreManagerInterface $storeManager,
         private readonly ConsentStorage $consentStorage,
         private readonly PhoneStorage $phoneStorage,
+        private readonly Config $config,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -42,6 +44,31 @@ class Consent extends Template
     {
         $subscriber = $this->getSubscriber();
         return $subscriber ? $this->phoneStorage->read($subscriber) : '';
+    }
+
+    public function getPhoneLabel(): string
+    {
+        return $this->config->getPhoneLabel($this->getStoreId());
+    }
+
+    public function getPhoneNote(): string
+    {
+        return $this->config->getPhoneNote($this->getStoreId());
+    }
+
+    public function getSmsLabel(): string
+    {
+        return $this->config->getSmsLabel($this->getStoreId());
+    }
+
+    public function getCallLabel(): string
+    {
+        return $this->config->getCallLabel($this->getStoreId());
+    }
+
+    private function getStoreId(): int
+    {
+        return (int)$this->storeManager->getStore()->getId();
     }
 
     private function getSubscriber(): ?\Magento\Newsletter\Model\Subscriber

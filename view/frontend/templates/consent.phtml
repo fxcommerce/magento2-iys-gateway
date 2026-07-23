@@ -3,7 +3,7 @@
 ?>
 <div class="field telephone">
     <label for="iys_phone_number" class="label">
-        <span><?= $block->escapeHtml(__('GSM Number')) ?></span>
+        <span><?= $block->escapeHtml($block->getPhoneLabel()) ?></span>
     </label>
     <div class="control">
         <input type="tel"
@@ -14,7 +14,7 @@
                autocomplete="tel"
                data-validate='{"validate-phoneStrict":true}'>
         <div class="note">
-            <?= $block->escapeHtml(__('SMS and call permissions apply to this GSM number.')) ?>
+            <?= $block->escapeHtml($block->getPhoneNote()) ?>
         </div>
     </div>
 </div>
@@ -26,7 +26,7 @@
            class="checkbox"
            <?= $block->isSmsConsent() ? 'checked="checked"' : '' ?>>
     <label for="sms_consent" class="label">
-        <span><?= $block->escapeHtml(__('I consent to receive commercial SMS messages.')) ?></span>
+        <span><?= $block->escapeHtml($block->getSmsLabel()) ?></span>
     </label>
 </div>
 <div class="field choice">
@@ -37,6 +37,6 @@
            class="checkbox"
            <?= $block->isCallConsent() ? 'checked="checked"' : '' ?>>
     <label for="call_consent" class="label">
-        <span><?= $block->escapeHtml(__('I consent to receive commercial phone calls.')) ?></span>
+        <span><?= $block->escapeHtml($block->getCallLabel()) ?></span>
     </label>
 </div>

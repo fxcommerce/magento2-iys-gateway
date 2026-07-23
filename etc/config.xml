@@ -15,7 +15,14 @@
             </sync>
             <phone>
                 <source>subscriber</source>
-                <attribute_code>phone_number</attribute_code>
+                <subscriber_field>phone_number</subscriber_field>
+                <customer_attribute></customer_attribute>
+                <display>
+                    <phone_label>GSM Number</phone_label>
+                    <phone_note>SMS and call permissions apply to this GSM number.</phone_note>
+                    <sms_label>I consent to receive commercial SMS messages.</sms_label>
+                    <call_label>I consent to receive commercial phone calls.</call_label>
+                </display>
             </phone>
         </fxcommerce_iys>
     </default>
