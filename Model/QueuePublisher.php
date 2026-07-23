@@ -5,6 +5,7 @@ namespace FxCommerce\IysGateway\Model;
 
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Newsletter\Model\ResourceModel\Subscriber as SubscriberResource;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ class QueuePublisher
         private readonly SynchronizationContext $context,
         private readonly StoreManagerInterface $storeManager,
         private readonly PhoneResolver $phoneResolver,
+        private readonly SubscriberResource $subscriberResource,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -28,6 +30,7 @@ class QueuePublisher
         }
 
         try {
+            $this->ensureStableTimestamps($subscriber);
             $payload = $this->buildPayload($subscriber);
             $eventHash = hash('sha256', $this->json->serialize([
                 $payload['storeId'],
@@ -77,6 +80,13 @@ class QueuePublisher
     {
         $store = $this->storeManager->getStore((int)$subscriber->getStoreId());
         $website = $store->getWebsite();
+        $email = strtolower(trim((string)$subscriber->getSubscriberEmail()));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException(sprintf(
+                'Subscriber %d has an invalid email address and was not queued.',
+                (int)$subscriber->getId()
+            ));
+        }
         $emailConsent = (int)$subscriber->getStatus() === Subscriber::STATUS_SUBSCRIBED;
         $smsValue = $subscriber->getData('sms_consent');
         $callValue = $subscriber->getData('call_consent');
@@ -108,7 +118,7 @@ class QueuePublisher
             'websiteCode' => (string)$website->getCode(),
             'websiteName' => (string)$website->getName(),
             'customerId' => $subscriber->getCustomerId() ? (int)$subscriber->getCustomerId() : null,
-            'email' => strtolower((string)$subscriber->getSubscriberEmail()),
+            'email' => $email,
             'phone' => $phone !== '' ? $phone : null,
             'emailConsent' => $emailConsent,
             'emailConsentAt' => $emailConsentAt,
@@ -118,6 +128,39 @@ class QueuePublisher
             'callConsentAt' => $callConsentAt,
             'consentAt' => $consentAt,
         ];
+    }
+
+    private function ensureStableTimestamps(Subscriber $subscriber): void
+    {
+        $fallback = trim((string)$subscriber->getChangeStatusAt());
+        if ($fallback === '') {
+            $fallback = gmdate('Y-m-d H:i:s');
+        }
+
+        $updates = [];
+        if (!$subscriber->getData('email_consent_at')) {
+            $updates['email_consent_at'] = $fallback;
+        }
+        if ($subscriber->getData('sms_consent') !== null && !$subscriber->getData('sms_consent_at')) {
+            $updates['sms_consent_at'] = $fallback;
+        }
+        if ($subscriber->getData('call_consent') !== null && !$subscriber->getData('call_consent_at')) {
+            $updates['call_consent_at'] = $fallback;
+        }
+        if (!$updates) {
+            return;
+        }
+
+        $connection = $this->subscriberResource->getConnection();
+        $connection->update(
+            $this->subscriberResource->getMainTable(),
+            $updates,
+            ['subscriber_id = ?' => (int)$subscriber->getId()]
+        );
+        foreach ($updates as $field => $value) {
+            $subscriber->setData($field, $value);
+            $subscriber->setOrigData($field, $value);
+        }
     }
 
     private function timestamp(mixed $value, string $fallback): string
