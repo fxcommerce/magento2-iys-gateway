@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FxCommerce\IysGateway\Plugin\Newsletter;
 
 use FxCommerce\IysGateway\Model\ConsentStorage;
+use FxCommerce\IysGateway\Model\Config;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Message\ManagerInterface;
@@ -18,6 +19,7 @@ class ManageSavePlugin
         private readonly Session $customerSession,
         private readonly StoreManagerInterface $storeManager,
         private readonly ConsentStorage $consentStorage,
+        private readonly Config $config,
         private readonly ManagerInterface $messageManager,
         private readonly LoggerInterface $logger
     ) {
@@ -31,12 +33,21 @@ class ManageSavePlugin
         }
 
         try {
+            $storeId = (int)$this->storeManager->getStore()->getId();
+            $smsEnabled = $this->config->isSmsEnabled($storeId);
+            $callEnabled = $this->config->isCallEnabled($storeId);
+            if (!$smsEnabled && !$callEnabled) {
+                return $result;
+            }
+
             $this->consentStorage->saveCustomerConsents(
                 $customerId,
-                (int)$this->storeManager->getStore()->getId(),
-                (bool)$this->request->getParam('sms_consent', false),
-                (bool)$this->request->getParam('call_consent', false),
-                (string)$this->request->getParam('phone_number', '')
+                $storeId,
+                $smsEnabled ? (bool)$this->request->getParam('sms_consent', false) : null,
+                $callEnabled ? (bool)$this->request->getParam('call_consent', false) : null,
+                $this->config->getPhoneSource($storeId) === 'customer'
+                    ? null
+                    : (string)$this->request->getParam('phone_number', '')
             );
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to save customer SMS/call consents.', [

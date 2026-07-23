@@ -31,6 +31,18 @@
             <group id="phone" translate="label" type="text" sortOrder="15"
                    showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>SMS and Call Recipient</label>
+                <field id="sms_enabled" translate="label comment" type="select" sortOrder="5"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable SMS Consent</label>
+                    <comment>Show and synchronize SMS consent for this store view.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="call_enabled" translate="label comment" type="select" sortOrder="6"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Call Consent</label>
+                    <comment>Show and synchronize call consent for this store view.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="source" translate="label comment" type="select" sortOrder="10"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Phone Number Source</label>
@@ -64,19 +76,23 @@
                            showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Phone Number Label</label>
                         <comment>Displayed on the customer Newsletter page.</comment>
+                        <config_path>fxcommerce_iys/phone/display/phone_label</config_path>
                     </field>
                     <field id="phone_note" translate="label comment" type="text" sortOrder="20"
                            showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Phone Number Description</label>
                         <comment>Displayed below the phone number field.</comment>
+                        <config_path>fxcommerce_iys/phone/display/phone_note</config_path>
                     </field>
                     <field id="sms_label" translate="label comment" type="text" sortOrder="30"
                            showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>SMS Consent Label</label>
+                        <config_path>fxcommerce_iys/phone/display/sms_label</config_path>
                     </field>
                     <field id="call_label" translate="label comment" type="text" sortOrder="40"
                            showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Call Consent Label</label>
+                        <config_path>fxcommerce_iys/phone/display/call_label</config_path>
                     </field>
                 </group>
             </group>

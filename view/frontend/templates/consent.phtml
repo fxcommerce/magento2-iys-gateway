@@ -1,6 +1,8 @@
 <?php
 /** @var \FxCommerce\IysGateway\Block\Consent $block */
 ?>
+<?php if ($block->isSmsEnabled() || $block->isCallEnabled()): ?>
+<?php if ($block->shouldShowPhoneInput()): ?>
 <div class="field telephone">
     <label for="iys_phone_number" class="label">
         <span><?= $block->escapeHtml($block->getPhoneLabel()) ?></span>
@@ -18,6 +20,8 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
+<?php if ($block->isSmsEnabled()): ?>
 <div class="field choice">
     <input type="checkbox"
            name="sms_consent"
@@ -29,6 +33,8 @@
         <span><?= $block->escapeHtml($block->getSmsLabel()) ?></span>
     </label>
 </div>
+<?php endif; ?>
+<?php if ($block->isCallEnabled()): ?>
 <div class="field choice">
     <input type="checkbox"
            name="call_consent"
@@ -40,3 +46,5 @@
         <span><?= $block->escapeHtml($block->getCallLabel()) ?></span>
     </label>
 </div>
+<?php endif; ?>
+<?php endif; ?>

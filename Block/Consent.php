@@ -46,6 +46,21 @@ class Consent extends Template
         return $subscriber ? $this->phoneStorage->read($subscriber) : '';
     }
 
+    public function isSmsEnabled(): bool
+    {
+        return $this->config->isSmsEnabled($this->getStoreId());
+    }
+
+    public function isCallEnabled(): bool
+    {
+        return $this->config->isCallEnabled($this->getStoreId());
+    }
+
+    public function shouldShowPhoneInput(): bool
+    {
+        return $this->config->getPhoneSource($this->getStoreId()) !== 'customer';
+    }
+
     public function getPhoneLabel(): string
     {
         return $this->config->getPhoneLabel($this->getStoreId());

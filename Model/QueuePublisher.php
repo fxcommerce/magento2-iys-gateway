@@ -19,6 +19,7 @@ class QueuePublisher
         private readonly StoreManagerInterface $storeManager,
         private readonly PhoneResolver $phoneResolver,
         private readonly SubscriberResource $subscriberResource,
+        private readonly Config $config,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -88,11 +89,18 @@ class QueuePublisher
             ));
         }
         $emailConsent = (int)$subscriber->getStatus() === Subscriber::STATUS_SUBSCRIBED;
-        $smsValue = $subscriber->getData('sms_consent');
-        $callValue = $subscriber->getData('call_consent');
+        $storeId = (int)$store->getId();
+        $smsValue = $this->config->isSmsEnabled($storeId)
+            ? $subscriber->getData('sms_consent')
+            : null;
+        $callValue = $this->config->isCallEnabled($storeId)
+            ? $subscriber->getData('call_consent')
+            : null;
         $smsConsent = $smsValue === null ? null : (bool)$smsValue;
         $callConsent = $callValue === null ? null : (bool)$callValue;
-        $phone = $this->phoneResolver->resolve($subscriber);
+        $phone = ($smsConsent !== null || $callConsent !== null)
+            ? $this->phoneResolver->resolve($subscriber)
+            : '';
         if (($smsConsent || $callConsent) && $phone === '') {
             throw new \RuntimeException('A phone number is required for approved SMS or call consent.');
         }

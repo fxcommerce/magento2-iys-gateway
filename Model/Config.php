@@ -134,6 +134,24 @@ class Config
         return (string)($this->value('phone/source', $storeId) ?: 'subscriber');
     }
 
+    public function isSmsEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PREFIX . 'phone/sms_enabled',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    public function isCallEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PREFIX . 'phone/call_enabled',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
     public function getPhoneAttributeCode(?int $storeId = null): string
     {
         if ($this->getPhoneSource($storeId) === 'customer') {

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FxCommerce\IysGateway\Model\Gateway;
 
+use FxCommerce\IysGateway\Model\Config;
 use FxCommerce\IysGateway\Model\ConsentStorage;
 use Psr\Log\LoggerInterface;
 
@@ -11,6 +12,7 @@ class InboundSynchronizer
     public function __construct(
         private readonly Client $client,
         private readonly ConsentStorage $consentStorage,
+        private readonly Config $config,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -35,6 +37,16 @@ class InboundSynchronizer
             $actionId = is_array($action) ? trim((string)($action['actionId'] ?? '')) : '';
             try {
                 $normalized = $this->normalizeAction($action);
+                if (!$this->isChannelEnabled($normalized['channel'], $storeId)) {
+                    $results[] = ['actionId' => $normalized['actionId'], 'success' => true];
+                    ++$applied;
+                    $this->logger->info('Skipped disabled IYS consent channel for store view.', [
+                        'store_id' => $storeId,
+                        'action_id' => $normalized['actionId'],
+                        'channel' => $normalized['channel'],
+                    ]);
+                    continue;
+                }
                 $this->consentStorage->applyInboundAction(
                     $normalized['email'],
                     $normalized['phone'],
@@ -104,6 +116,15 @@ class InboundSynchronizer
             }
         }
         return $summary;
+    }
+
+    private function isChannelEnabled(string $channel, int $storeId): bool
+    {
+        return match ($channel) {
+            'SMS' => $this->config->isSmsEnabled($storeId),
+            'CALL' => $this->config->isCallEnabled($storeId),
+            default => true,
+        };
     }
 
     /** @return array{actionId:string,email:string,phone:string,channel:string,status:string,consentAt:string} */

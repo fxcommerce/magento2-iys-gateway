@@ -58,16 +58,12 @@ class ConsentStorage
     public function saveCustomerConsents(
         int $customerId,
         int $storeId,
-        bool $smsConsent,
-        bool $callConsent,
-        string $phoneNumber = ''
+        ?bool $smsConsent,
+        ?bool $callConsent,
+        ?string $phoneNumber = null
     ): Subscriber {
         $subscriber = $this->getByCustomerId($customerId, $storeId);
         $now = gmdate('Y-m-d H:i:s');
-        $phone = $this->normalizePhone($phoneNumber);
-        if (($smsConsent || $callConsent) && $phone === '') {
-            throw new LocalizedException(__('A valid phone number is required for SMS or call consent.'));
-        }
 
         if (!$subscriber) {
             $customer = $this->customerRepository->getById($customerId);
@@ -77,23 +73,47 @@ class ConsentStorage
             $subscriber->setData('store_id', $storeId);
             $subscriber->setData('subscriber_status', Subscriber::STATUS_UNSUBSCRIBED);
             $subscriber->setData('email_consent_at', $now);
-            $subscriber->setData('sms_consent_at', $now);
-            $subscriber->setData('call_consent_at', $now);
-        } else {
-            $this->backfillTimestamps($subscriber, $now);
-            $phoneChanged = $this->normalizePhone((string)$subscriber->getData('phone_number')) !== $phone;
-            if ((bool)$subscriber->getData('sms_consent') !== $smsConsent || $phoneChanged) {
+            if ($smsConsent !== null) {
                 $subscriber->setData('sms_consent_at', $now);
             }
-            if ((bool)$subscriber->getData('call_consent') !== $callConsent || $phoneChanged) {
+            if ($callConsent !== null) {
+                $subscriber->setData('call_consent_at', $now);
+            }
+        } else {
+            $this->backfillTimestamps($subscriber, $now);
+        }
+
+        $phone = $phoneNumber === null
+            ? $this->phoneStorage->read($subscriber)
+            : $this->normalizePhone($phoneNumber);
+        if (($smsConsent === true || $callConsent === true) && $phone === '') {
+            throw new LocalizedException(__('A valid phone number is required for SMS or call consent.'));
+        }
+        $phoneChanged = $this->normalizePhone((string)$subscriber->getData('phone_number')) !== $phone;
+
+        if ($subscriber->getId()) {
+            if ($smsConsent !== null
+                && ((bool)$subscriber->getData('sms_consent') !== $smsConsent || $phoneChanged)
+            ) {
+                $subscriber->setData('sms_consent_at', $now);
+            }
+            if ($callConsent !== null
+                && ((bool)$subscriber->getData('call_consent') !== $callConsent || $phoneChanged)
+            ) {
                 $subscriber->setData('call_consent_at', $now);
             }
         }
 
-        $this->phoneStorage->write($subscriber, $phone);
+        if ($phoneNumber !== null) {
+            $this->phoneStorage->write($subscriber, $phone);
+        }
         $subscriber->setData('phone_number', $phone !== '' ? $phone : null);
-        $subscriber->setData('sms_consent', $smsConsent ? 1 : 0);
-        $subscriber->setData('call_consent', $callConsent ? 1 : 0);
+        if ($smsConsent !== null) {
+            $subscriber->setData('sms_consent', $smsConsent ? 1 : 0);
+        }
+        if ($callConsent !== null) {
+            $subscriber->setData('call_consent', $callConsent ? 1 : 0);
+        }
         $this->subscriberResource->save($subscriber);
         $this->queuePublisher->publish($subscriber);
         return $subscriber;

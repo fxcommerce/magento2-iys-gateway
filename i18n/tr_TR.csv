@@ -38,3 +38,7 @@
 "Displayed below the phone number field.","Telefon numarası alanının altında gösterilir."
 "SMS Consent Label","SMS İzni Etiketi"
 "Call Consent Label","Arama İzni Etiketi"
+"Enable SMS Consent","SMS İznini Etkinleştir"
+"Show and synchronize SMS consent for this store view.","Bu mağaza görünümü için SMS iznini gösterin ve senkronize edin."
+"Enable Call Consent","Arama İznini Etkinleştir"
+"Show and synchronize call consent for this store view.","Bu mağaza görünümü için arama iznini gösterin ve senkronize edin."
